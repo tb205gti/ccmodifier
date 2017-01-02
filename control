@@ -1,10 +1,9 @@
 Package: dk.catcams.ccmodifier
 Name: CCModifier
 Depends: mobilesubstrate, firmware (>= 10.0)
-Version: 0.0.2
+Version: 0.0.1
 Architecture: iphoneos-arm
 Description: ios10 CC Modifier
 Maintainer: Peter Klug Wiwel
 Author: Peter Klug Wiwel
 Section: Tweaks
-

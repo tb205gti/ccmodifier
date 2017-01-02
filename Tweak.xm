@@ -40,6 +40,8 @@
 %end
 
 
+
+
 /*%hook CCUIArtraceShortcut
 
 +(BOOL)isSupported:(int)arg1{
