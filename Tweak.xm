@@ -2,37 +2,34 @@
 #import <UIKit/UIKit.h>
 #include <substrate.h>
 
-//disables colors on buttons in ControlCenter
-%hook CCUIControlCenterButton
-
--(id)_effectiveSelectedColor{
-
-	return 0;
-}
-
-%end
-
 
 @interface SBWallpaperEffectView : UIView
 @end
 
 @interface SBDockView : UIView
-@property(nonatomic) CGFloat alpha;
-@property(retain, nonatomic) SBWallpaperEffectView *_backgroundView;
+	@property(nonatomic) CGFloat alpha;
+	@property(retain, nonatomic) SBWallpaperEffectView *_backgroundView;
 @end
+
+
+
+
+/****************************
+	   Dock modifiers
+****************************/
 
 //Fjerner Doc'en
 %hook SBDockView
+	-(void)layoutSubviews
+	{
+		%orig;
+		SBWallpaperEffectView *backgroundView = MSHookIvar<SBWallpaperEffectView *>(self, "_backgroundView");
+		backgroundView.hidden = YES;
+	}
 
 
--(void)layoutSubviews
-{
-	%orig;
-	SBWallpaperEffectView *backgroundView = MSHookIvar<SBWallpaperEffectView *>(self, "_backgroundView");
-	backgroundView.hidden = YES;
-}
-
-/*	- (void)setBackgroundAlpha:(double)arg1
+	//Sætter Alpha på dock'en - hvis man vil beholde den.
+	/*	- (void)setBackgroundAlpha:(double)arg1
 	{
 		%orig;
 		MSHookIvar<SBWallpaperEffectView *>(self, "_backgroundView").alpha = 0.0;
@@ -40,33 +37,20 @@
 %end
 
 
+/****************************
+	CCSetings modifiers
+****************************/
 
 
-/*%hook CCUIArtraceShortcut
+//disables colors on buttons in ControlCenter
+%hook CCUIControlCenterButton
 
-+(BOOL)isSupported:(int)arg1{
-	return TRUE;
-}
-+(BOOL)isInternalButton{
-
-	return FALSE;
-}
-
--(NSURL *)url{
-
-	return [NSURL URLWithString:@"prefs:root=General&path=Network/VPN"];
-}
-
--(void)activateApp{
-
-
-[[UIApplication sharedApplication] openURL:
-       [NSURL URLWithString:@"prefs:root=VPN"]];
-}
-
+	-(id)_effectiveSelectedColor{
+		return 0;
+	}
 
 %end
-*/
+
 
 %hook CCUIPersonalHotspotSetting
 +(BOOL)isSupported:(int)arg1{
@@ -80,75 +64,82 @@
 
 %end
 
-/*%hook CCUIMuteSetting
-
-+(BOOL)isSupported:(int)arg1{
-
-	return TRUE;
-}
--(BOOL)isRestricted{
-	return FALSE;
-}
-%end*/
-
 
 %hook CCUIRecordScreenShortcut
 
-+(BOOL)isSupported:(int)arg1{
+	+(BOOL)isSupported:(int)arg1{
+		return TRUE;
+	}
 
-	return TRUE;
-}
+	+(BOOL)isInternalButton{
+		return FALSE;
+	}
 
-+(BOOL)isInternalButton{
-return FALSE;
+	-(BOOL)isRestricted{
+		return FALSE;
+	}
 
-}
-
--(BOOL)isRestricted{
-
-	return FALSE;
-}
-
-//Tilføjer et ikon til record knappen
-/*- (UIImage *)glyphImageForState:(UIControlState)state
-{
-	return [UIImage imageNamed:@"RecordVideo-OrbHW@2x.png" inBundle:[NSBundle bundleWithPath:@"/Applications/Camera.app/"]];
-}*/
-
+	//Tilføjer et ikon til record knappen
+	/*- (UIImage *)glyphImageForState:(UIControlState)state
+	{
+		return [UIImage imageNamed:@"RecordVideo-OrbHW@2x.png" inBundle:[NSBundle bundleWithPath:@"/Applications/Camera.app/"]];
+	}*/
 
 %end
 
 
 %hook CCUICalculatorShortcut
 
-/*
--(void)setDisplayID:(NSString *)arg1 {
 
-	
-}*/
+	-(NSURL *)url{
+		return [NSURL URLWithString:@"prefs:root=General&path=Network/VPN"];
+	}
+
+	-(void)activateApp{
+		[[UIApplication sharedApplication] openURL:
+       	[NSURL URLWithString:@"prefs:root=VPN"]];
+	}
+%end
 
 
--(NSURL *)url{
+/*%
+hook CCUIMuteSetting
 
-	return [NSURL URLWithString:@"prefs:root=General&path=Network/VPN"];
-}
+	+(BOOL)isSupported:(int)arg1{
+		return TRUE;
+	}
+	-(BOOL)isRestricted{
+		return FALSE;
+	}
+%end
 
--(void)activateApp{
 
-/*UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Connect VPN"
-                                                message:@"Do you with to connect to your VPN?"
-                                               delegate:self
-                                      cancelButtonTitle:@"Nope"
-                                      otherButtonTitles:@"Yes",nil];
-	[alert show];
-*/
+%hook CCUIAirStuffSectionController
+	-(void)_airDropTapped:(id)arg1{
+	}
+%end
 
-[[UIApplication sharedApplication] openURL:
-       [NSURL URLWithString:@"prefs:root=VPN"]];
-}
+%hook CCUIArtraceShortcut
+	+(BOOL)isSupported:(int)arg1{
+		return TRUE;
+	}
+	+(BOOL)isInternalButton{
+		return FALSE;
+	}
+
+	-(NSURL *)url{
+		return [NSURL URLWithString:@"prefs:root=General&path=Network/VPN"];
+	}
+
+	-(void)activateApp{
+		[[UIApplication sharedApplication] openURL:
+       		[NSURL URLWithString:@"prefs:root=VPN"]];
+	}
 
 
 %end
+*/
+
 
 /*%hook CCUIWiFiSetting
 
@@ -166,6 +157,10 @@ return FALSE;
 	
 %end*/
 
+/****************************
+	Carrier modifiers
+****************************/
+
 
 //Hides the signalstrength dots..
 %hook UIStatusBarSignalStrengthItemView
@@ -176,48 +171,42 @@ return FALSE;
 
 //Hides the CarrierName
 %hook UIStatusBarServiceItemView
--(id)_serviceContentsImage{
-	return NULL;
-}
-
--(id)contentsImage{
-	return NULL;
-}
-%end
-
-/*
-%hook CCUIAirStuffSectionController
-
-	-(void)_airDropTapped:(id)arg1{
-
-
+	-(id)_serviceContentsImage{
+		return NULL;
 	}
 
+	-(id)contentsImage{
+		return NULL;
+	}
 %end
-*/
+
+
+/****************************
+	SpringBoard modifiers
+****************************/
+
 %hook SBApplicationInfo
 
 //Fjerner navnet fra ikonerne på Springboard'et
--(NSString *)displayName{
-	return @"";
+	-(NSString *)displayName{
+		return @"";
+	}
 
-}
 %end
 
 %hook SBFolder
--(NSString *)displayName{
-	return @"";
-}
+	-(NSString *)displayName{
+		return @"";
+	}
 %end
 
 %hook CCUIControlCenterContainerView
--(double)_contentHeight{
-	return 245.0;
-}
+	-(double)_contentHeight{
+		return 245.0;
+	}
 %end
 
 %hook CCUIControlCenterPushButtonSettings
-
 	-(void)setEnabled:(BOOL)arg1{
 		%orig;
 		return;
