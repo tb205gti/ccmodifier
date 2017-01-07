@@ -1,5 +1,5 @@
-#import <Foundation/Foundation.h>
-#import <UIKit/UIKit.h>
+//#import <Foundation/Foundation.h>
+//#import <UIKit/UIKit.h>
 #include <substrate.h>
 
 
@@ -11,7 +11,33 @@
 	@property(retain, nonatomic) SBWallpaperEffectView *_backgroundView;
 @end
 
+@interface SBAlertView : UIView {
 
+	//SBAlert* _alert;
+	unsigned _shouldAnimateIn : 1;
+
+}
+@end
+
+
+@interface _UIActionSlider : UIControl
+	-(void)setTrackText:(NSString *)arg1 ;
+@end
+
+@interface SBPowerDownView : SBAlertView
+@end
+
+%hook SBPowerDownController
+
+
+	-(void)activate{
+		SBPowerDownView *powerDownView = MSHookIvar<SBPowerDownView *>(self, "_powerDownView"); // Than
+		_UIActionSlider *actionSlider = MSHookIvar<_UIActionSlider *>(powerDownView, "_actionSlider");
+		[actionSlider setTrackText:@"Are you sure?"];
+
+		%orig;
+	}
+%end
 
 
 /****************************
@@ -40,6 +66,46 @@
 /****************************
 	CCSetings modifiers
 ****************************/
+
+
+
+
+%hook CCUIControlCenterContainerView
+
+
+//-(void)layoutSubviews{
+//CCUIControlCenterSettings *backgroundView = MSHookIvar<CCUIControlCenterSettings *>(self, "_settings");
+//}
+
+/*-(void)controlCenterWillPresent{
+	UIView *backgroundView = MSHookIvar<UIView *>(self, "_darkeningContainer");
+	UIColor *color = [UIColor colorWithRed:128.0/255.0 
+                        green:128.0/255.0 
+                         blue:128.0/255.0 
+                        alpha:0.5];
+
+	backgroundView.backgroundColor = color;
+
+
+}
+*/
+
+/*-(void)setRevealPercentage:(double)arg1{
+
+	%orig(100.0);
+}*/
+
+	-(double)_contentHeight{
+		return 245.0;
+	}
+%end
+
+%hook CCUIControlCenterPushButtonSettings
+	-(void)setEnabled:(BOOL)arg1{
+		%orig;
+		return;
+}
+%end
 
 
 //disables colors on buttons in ControlCenter
@@ -89,7 +155,6 @@
 
 
 %hook CCUICalculatorShortcut
-
 
 	-(NSURL *)url{
 		return [NSURL URLWithString:@"prefs:root=General&path=Network/VPN"];
@@ -200,16 +265,12 @@ hook CCUIMuteSetting
 	}
 %end
 
-%hook CCUIControlCenterContainerView
-	-(double)_contentHeight{
-		return 245.0;
-	}
-%end
+//Fjerner folder background'en
+%hook SBFolderBackgroundView
+-(id)_tintViewBackgroundColorAtFullAlpha{
 
-%hook CCUIControlCenterPushButtonSettings
-	-(void)setEnabled:(BOOL)arg1{
-		%orig;
-		return;
+	return NULL;
+
 }
 
 %end
