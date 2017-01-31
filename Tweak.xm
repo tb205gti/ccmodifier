@@ -369,26 +369,17 @@ hook CCUIMuteSetting
 	}
 %end
 
-
 /****************************
 	SpringBoard modifiers
 ****************************/
 
-%hook SBApplicationInfo
+%hook SBIconLabelImageParameters
 
-//Fjerner navnet fra ikonerne på Springboard'et
-	-(NSString *)displayName{
+	-(NSString *)text{
 		return @"";
 	}
-
-
-- (NSString *)displayNameForLocation:(NSInteger)location
-{
-	return @"";
-}
-
-
 %end
+
 
 %hook SBFolder
 	-(NSString *)displayName{
